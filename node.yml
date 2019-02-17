@@ -1,0 +1,24 @@
+---
+- name: install node.js
+  hosts: all
+  become: yes
+  become_user: "{{username}}"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    username: vagrant 
+    homedir: /home/{{username}}
+    linux_arch: x64
+    nodejs_version: 10.15.1
+    nodejs_filename: "node-v{{nodejs_version}}-linux-{{linux_arch}}"
+    nodejs_dir: "{{homedir}}/node"
+  tasks:
+  - name: download nodejs
+    get_url: url=https://nodejs.org/dist/v{{nodejs_version}}/{{nodejs_filename}}.tar.xz dest=/tmp/nodejs.tar.gz
+  - name: extract nodejs from archive
+    command: chdir=/tmp/ /bin/tar xvf nodejs.tar.gz creates=/tmp/{{nodejs_filename}}
+  - name: mv nodejs to the home directory
+    command: cp -r /tmp/{{nodejs_filename}} "{{nodejs_dir}}" creates="{{nodejs_dir}}" 
+  - name: remove nodejs archive
+    file:
+      state: absent
+      path: "{{nodejs_filename}}"
